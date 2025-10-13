@@ -8,7 +8,7 @@ import org.junit.runners.Parameterized;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 
@@ -24,6 +24,7 @@ public class BurgerParameterizedTest {
     private final String expectedTypeString;
 
     private AutoCloseable closeable;
+    private Burger burger;
 
     public BurgerParameterizedTest(IngredientType ingredientType, String expectedTypeString){
         this.ingredientType = ingredientType;
@@ -33,6 +34,7 @@ public class BurgerParameterizedTest {
 
     @Before
     public void setUp() {
+        burger = new Burger();
         closeable = MockitoAnnotations.openMocks(this);
     }
 
@@ -46,7 +48,6 @@ public class BurgerParameterizedTest {
 
     @Test
     public void testGetReceiptWithDifferentIngredientType(){
-        Burger burger = new Burger();
         burger.setBuns(mockbun);
         burger.addIngredient(mockIngredient);
 
@@ -57,7 +58,12 @@ public class BurgerParameterizedTest {
         when(mockIngredient.getPrice()).thenReturn(50.0f);
 
         String receipt = burger.getReceipt();
-        assertTrue("Receipt should contain correct ingredient type: " + expectedTypeString, receipt.contains(expectedTypeString));
+        String expectedReceipt = "(==== Test Bun ====)\n" +
+                "= " + expectedTypeString + " Test Ingredient =\n" +
+                "(==== Test Bun ====)\n\n" +
+                "Price: 250,000000\n";
+        assertEquals("Receipt should have correct format for ingredient type: " + expectedTypeString,
+                expectedReceipt, receipt.replace("\r\n", "\n"));
     }
 
     @After
